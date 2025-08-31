@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Megatlon.Payments.Infrastructure.Persistence;
 using FluentValidation;
+using Megatlon.Payments.Application.Validation;
 
 namespace Megatlon.Payments.Api
 {
@@ -20,6 +21,7 @@ namespace Megatlon.Payments.Api
 
             // FluentValidation
             builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+            builder.Services.AddValidatorsFromAssembly(typeof(RegistrarPagoValidator).Assembly);
 
             var app = builder.Build();
 
