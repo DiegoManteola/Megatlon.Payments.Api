@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Megatlon.Payments.Infrastructure.Persistence;
+using FluentValidation;
 
 namespace Megatlon.Payments.Api
 {
@@ -7,16 +10,19 @@ namespace Megatlon.Payments.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
+            // Controllers + Swagger
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // EF Core SQLite
+            builder.Services.AddDbContext<PaymentsDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
+
+            // FluentValidation
+            builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -24,10 +30,6 @@ namespace Megatlon.Payments.Api
             }
 
             app.UseHttpsRedirection();
-
-            app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();
