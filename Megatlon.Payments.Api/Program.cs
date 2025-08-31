@@ -1,7 +1,8 @@
-using Microsoft.EntityFrameworkCore;
-using Megatlon.Payments.Infrastructure.Persistence;
 using FluentValidation;
+using Megatlon.Payments.Api.Middleware;
 using Megatlon.Payments.Application.Validation;
+using Megatlon.Payments.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace Megatlon.Payments.Api
 {
@@ -17,10 +18,8 @@ namespace Megatlon.Payments.Api
             builder.Services.AddSwaggerGen();
 
             // EF Core SQLite
-            builder.Services.AddDbContext<PaymentsDbContext>(options => options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
+            builder.Services.AddDbContext<PaymentsDbContext>(opt => opt.UseSqlite(builder.Configuration.GetConnectionString("Default")));
 
-            // FluentValidation
-            builder.Services.AddValidatorsFromAssemblyContaining<Program>();
             builder.Services.AddValidatorsFromAssembly(typeof(RegistrarPagoValidator).Assembly);
 
             var app = builder.Build();
@@ -32,6 +31,7 @@ namespace Megatlon.Payments.Api
             }
 
             app.UseHttpsRedirection();
+            app.UseMiddleware<RequestResponseLoggingMiddleware>();
             app.MapControllers();
 
             app.Run();
