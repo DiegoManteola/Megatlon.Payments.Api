@@ -1,90 +1,112 @@
 ﻿using FluentValidation;
-using Megatlon.Payments.Application.Contracts.Requests;
-using Megatlon.Payments.Application.Contracts.Responses;
-using Megatlon.Payments.Domain.Entities;
-using Megatlon.Payments.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using FluentValidation.Results;
+
+using Megatlon.Payments.Application.Contracts.Requests;
+using Megatlon.Payments.Application.Contracts.Responses;
+using Megatlon.Payments.Application.Rules;
+using Megatlon.Payments.Application.Rules.Interfaces;
+using Megatlon.Payments.Domain.Entities;
+using Megatlon.Payments.Infrastructure.Persistence;
 
 namespace Megatlon.Payments.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class PagosController : ControllerBase
+    public sealed class PagosController : ControllerBase
     {
         private readonly PaymentsDbContext _db;
         private readonly IValidator<RegistrarPagoRequest> _validator;
+        private readonly IPaymentRuleEngine _ruleEngine;
 
-        public PagosController(PaymentsDbContext db, IValidator<RegistrarPagoRequest> validator)
+        public PagosController(
+            PaymentsDbContext db,
+            IValidator<RegistrarPagoRequest> validator,
+            IPaymentRuleEngine ruleEngine)
         {
             _db = db;
             _validator = validator;
+            _ruleEngine = ruleEngine;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] RegistrarPagoRequest request, CancellationToken ct)
+        public async Task<IActionResult> Post([FromBody] RegistrarPagoRequest req, CancellationToken ct)
         {
-            ValidationResult vr = await _validator.ValidateAsync(request, ct);
+            // Validación (FluentValidation)
+            var vr = await _validator.ValidateAsync(req, ct);
             if (!vr.IsValid)
-            {
-                var errs = vr.Errors.Select(e => e.ErrorMessage).ToList();
-                return BadRequest(new ApiResponse(false, "Datos inválidos", null, errs));
-            }
+                return BadRequest(new ApiResponse(false, "Datos inválidos", null, vr.Errors.Select(e => e.ErrorMessage).ToList()));
 
-            // Idempotencia: si ya existe un pago con Source + ExternalReference, no crear otro
-            var existing = await _db.Pagos
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Source == request.Source && p.ExternalReference == request.ExternalReference, ct);
+            // Idempotencia
+            var existing = await _db.Pagos.AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Source == req.Source && p.ExternalReference == req.ExternalReference, ct);
 
             if (existing is not null)
                 return Ok(new ApiResponse(true, "Pago ya registrado", new { pagoId = existing.Id }));
 
-            var moneda = await _db.Monedas.FirstOrDefaultAsync(m => m.ISOCode == request.MonedaISOCode, ct);
-            var medio = await _db.MediosPago.FirstOrDefaultAsync(m => m.Code == request.MedioPagoCode, ct);
-
+            // Referencias (Moneda / Medio)
+            var moneda = await _db.Monedas.FirstOrDefaultAsync(m => m.ISOCode == req.MonedaISOCode, ct);
+            var medio = await _db.MediosPago.FirstOrDefaultAsync(m => m.Code == req.MedioPagoCode, ct);
             if (moneda is null || medio is null)
                 return BadRequest(new ApiResponse(false, "Moneda o medio inválido", null,
-                    new List<string> { "Verifique MonedaISOCode y MedioPagoCode" }));
+                    new() { "Verifique MonedaISOCode y MedioPagoCode" }));
 
-            var cliente = await _db.Clientes.FirstOrDefaultAsync(c => c.Email == request.Cliente.Email, ct);
+            // Reglas de negocio configurables
+            var ctxRules = new PaymentContext
+            {
+                Request = req,
+                MedioPagoId = medio.Id,
+                MedioPagoCode = medio.Code,
+                MonedaId = moneda.Id,
+                MonedaISO = moneda.ISOCode,
+                CardBin = req.CardBin
+            };
+
+            var ruleErrors = await _ruleEngine.ValidateAsync(ctxRules, ct);
+            if (ruleErrors.Count > 0)
+                return BadRequest(new ApiResponse(false, "Reglas de negocio no satisfechas", null, ruleErrors.ToList()));
+
+            // Cliente
+            var cliente = await _db.Clientes.FirstOrDefaultAsync(c => c.Email == req.Cliente.Email, ct);
             if (cliente is null)
             {
                 cliente = new Cliente
                 {
                     Id = Guid.NewGuid(),
-                    Nombre = request.Cliente.Nombre,
-                    Email = request.Cliente.Email,
+                    Nombre = req.Cliente.Nombre,
+                    Email = req.Cliente.Email,
                     FechaAlta = DateTime.UtcNow
                 };
                 _db.Clientes.Add(cliente);
             }
 
+            // Alta del pago
             var pago = new Pago
             {
                 Id = Guid.NewGuid(),
                 Cliente = cliente,
-                Monto = request.Monto,
-                FechaPago = request.FechaPago,
+                Monto = req.Monto,
+                FechaPago = req.FechaPago,
                 MedioPagoId = medio.Id,
-                MedioPago = medio,
                 MonedaId = moneda.Id,
-                Moneda = moneda,
-                Source = request.Source,
-                ExternalReference = request.ExternalReference
+                MedioPago = medio,   // si tus navegaciones son 'required'
+                Moneda = moneda,     // idem
+                Source = req.Source,
+                ExternalReference = req.ExternalReference
             };
 
             _db.Pagos.Add(pago);
+
             try
             {
                 await _db.SaveChangesAsync(ct);
             }
             catch (DbUpdateException)
             {
-                var again = await _db.Pagos
-                    .AsNoTracking()
-                    .FirstAsync(p => p.Source == request.Source && p.ExternalReference == request.ExternalReference, ct);
+                // Carreras por índice único (Source, ExternalReference)
+                var again = await _db.Pagos.AsNoTracking()
+                    .FirstAsync(p => p.Source == req.Source && p.ExternalReference == req.ExternalReference, ct);
+
                 return Ok(new ApiResponse(true, "Pago ya registrado", new { pagoId = again.Id }));
             }
 
@@ -111,6 +133,7 @@ namespace Megatlon.Payments.Api.Controllers
                 medioPagoNombre = pago.MedioPago.Nombre,
                 monedaNombre = pago.Moneda.Nombre
             };
+
             return Ok(new ApiResponse(true, "OK", data));
         }
     }

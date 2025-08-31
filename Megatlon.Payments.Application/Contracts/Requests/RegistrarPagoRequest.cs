@@ -9,6 +9,7 @@ namespace Megatlon.Payments.Application.Contracts.Requests
         string MedioPagoCode,
         string MonedaISOCode,
         string ExternalReference,
-        string Source
+        string Source,
+        string? CardBin = null // <- opcional
     );
 }
