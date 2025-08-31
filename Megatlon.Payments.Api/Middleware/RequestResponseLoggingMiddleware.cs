@@ -1,17 +1,16 @@
-﻿namespace Megatlon.Payments.Api.Middleware
+﻿using System.Text.Json;
+
+namespace Megatlon.Payments.Api.Middleware
 {
     public sealed class RequestResponseLoggingMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<RequestResponseLoggingMiddleware> _logger;
         private static readonly string LogDir = Path.Combine(AppContext.BaseDirectory, "logs");
         private static readonly string LogFile = Path.Combine(LogDir, "pagos.txt");
 
-        public RequestResponseLoggingMiddleware(RequestDelegate next, 
-                                                ILogger<RequestResponseLoggingMiddleware> logger)
+        public RequestResponseLoggingMiddleware(RequestDelegate next)
         {
             _next = next;
-            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
@@ -41,11 +40,30 @@
             await mem.CopyToAsync(originalBody);
             context.Response.Body = originalBody;
 
-            var line = $@"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff}Z] {context.Request.Method} {context.Request.Path}{context.Request.QueryString}
-                            REQ: {bodyText}
-                            RESP({context.Response.StatusCode}): {responseText}
-                            ----";
+            var lines = new[]
+                {
+                    $"\t[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff}] {context.Request.Method} {context.Request.Path}{context.Request.QueryString}",
+                    $"\tREQ: {OneLineJson(bodyText)}",
+                    $"\tRESP({context.Response.StatusCode}): {OneLineJson(responseText)}",
+                    "============================="
+                };
+
+            var line = string.Join(Environment.NewLine, lines);
             await File.AppendAllTextAsync(LogFile, line + Environment.NewLine);
+        }
+
+        private static string OneLineJson(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json)) return "";
+            try
+            {
+                using var jDoc = JsonDocument.Parse(json);
+                return JsonSerializer.Serialize(jDoc, new JsonSerializerOptions { WriteIndented = false });
+            }
+            catch
+            {
+                return json.Replace(Environment.NewLine, " ");
+            }
         }
     }
 }

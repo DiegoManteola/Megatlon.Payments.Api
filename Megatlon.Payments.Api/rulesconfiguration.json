@@ -1,0 +1,20 @@
+{
+  "PaymentRules": {
+    "CASH": {
+      "Min": 3000000000,
+      "Max": null,
+      "AllowedCurrencies": [ "ARS", "USD", "UYU" ]
+    },
+    "CARD": {
+      "Min": 3000000000,
+      "Max": 20000000000,
+      "AllowedCurrencies": [ "ARS", "USD" ],
+      "AllowedBins": [ "411111", "522222" ]
+    },
+    "CHEQUE": {
+      "Min": 3000000000,
+      "Max": 5000000000,
+      "AllowedCurrencies": [ "ARS", "USD" ]
+    }
+  }
+}
