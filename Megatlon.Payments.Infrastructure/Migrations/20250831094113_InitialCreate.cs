@@ -98,9 +98,9 @@ namespace Megatlon.Payments.Infrastructure.Migrations
                 columns: new[] { "Id", "Code", "Descripcion", "Nombre" },
                 values: new object[,]
                 {
-                    { 1, "EFEC", "Pago en efectivo", "Efectivo" },
-                    { 2, "CHEQ", "Pago con Cheque", "Cheque" },
-                    { 3, "TARJ", "Pago con Tarjeta crédito/débito", "Tarjeta" }
+                    { 1, "CASH", "Pago en efectivo", "Efectivo" },
+                    { 2, "CARD", "Tarjeta crédito/débito", "Tarjeta" },
+                    { 3, "CHEQUE", "Cheque", "Cheque" }
                 });
 
             migrationBuilder.InsertData(

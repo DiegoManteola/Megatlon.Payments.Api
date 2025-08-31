@@ -66,23 +66,23 @@ namespace Megatlon.Payments.Infrastructure.Migrations
                         new
                         {
                             Id = 1,
-                            Code = "EFEC",
+                            Code = "CASH",
                             Descripcion = "Pago en efectivo",
                             Nombre = "Efectivo"
                         },
                         new
                         {
                             Id = 2,
-                            Code = "CHEQ",
-                            Descripcion = "Pago con Cheque",
-                            Nombre = "Cheque"
+                            Code = "CARD",
+                            Descripcion = "Tarjeta crédito/débito",
+                            Nombre = "Tarjeta"
                         },
                         new
                         {
                             Id = 3,
-                            Code = "TARJ",
-                            Descripcion = "Pago con Tarjeta crédito/débito",
-                            Nombre = "Tarjeta"
+                            Code = "CHEQUE",
+                            Descripcion = "Cheque",
+                            Nombre = "Cheque"
                         });
                 });
 

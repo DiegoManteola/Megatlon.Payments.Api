@@ -32,9 +32,9 @@ namespace Megatlon.Payments.Infrastructure.Persistence
             );
 
             b.Entity<MedioPago>().HasData(
-                new MedioPago { Id = 1, Nombre = "Efectivo", Descripcion = "Pago en efectivo", Code = "EFEC" },
-                new MedioPago { Id = 2, Nombre = "Cheque", Descripcion = "Pago con Cheque", Code = "CHEQ" },
-                new MedioPago { Id = 3, Nombre = "Tarjeta", Descripcion = "Pago con Tarjeta crédito/débito", Code = "TARJ" }
+                new MedioPago { Id = 1, Nombre = "Efectivo", Descripcion = "Pago en efectivo", Code = "CASH" },
+                new MedioPago { Id = 2, Nombre = "Tarjeta", Descripcion = "Tarjeta crédito/débito", Code = "CARD" },
+                new MedioPago { Id = 3, Nombre = "Cheque", Descripcion = "Cheque", Code = "CHEQUE" }
             );
         }
     }
