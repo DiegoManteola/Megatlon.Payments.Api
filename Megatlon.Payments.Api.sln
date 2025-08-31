@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Megatlon.Payments.Api", "Megatlon.Payments.Api\Megatlon.Payments.Api.csproj", "{50A1AA51-F4DD-47A0-A3FA-9958B0315F9A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Megatlon.Payments.Domain", "Megatlon.Payments.Domain\Megatlon.Payments.Domain.csproj", "{E45C5C09-0C06-4F8F-A447-BB4B094E44E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Megatlon.Payments.Application", "Megatlon.Payments.Application\Megatlon.Payments.Application.csproj", "{D709F35F-2E81-4517-9EC9-5D72E0FC7C48}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Megatlon.Payments.Infrastructure", "Megatlon.Payments.Infrastructure\Megatlon.Payments.Infrastructure.csproj", "{20B38F54-6C4A-4C74-8193-C065C56AAEAA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{50A1AA51-F4DD-47A0-A3FA-9958B0315F9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50A1AA51-F4DD-47A0-A3FA-9958B0315F9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50A1AA51-F4DD-47A0-A3FA-9958B0315F9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50A1AA51-F4DD-47A0-A3FA-9958B0315F9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E45C5C09-0C06-4F8F-A447-BB4B094E44E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E45C5C09-0C06-4F8F-A447-BB4B094E44E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E45C5C09-0C06-4F8F-A447-BB4B094E44E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E45C5C09-0C06-4F8F-A447-BB4B094E44E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D709F35F-2E81-4517-9EC9-5D72E0FC7C48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D709F35F-2E81-4517-9EC9-5D72E0FC7C48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D709F35F-2E81-4517-9EC9-5D72E0FC7C48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D709F35F-2E81-4517-9EC9-5D72E0FC7C48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20B38F54-6C4A-4C74-8193-C065C56AAEAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20B38F54-6C4A-4C74-8193-C065C56AAEAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20B38F54-6C4A-4C74-8193-C065C56AAEAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20B38F54-6C4A-4C74-8193-C065C56AAEAA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9BE1FED9-E6BB-4F41-964E-D464469E60C1}
+	EndGlobalSection
+EndGlobal
