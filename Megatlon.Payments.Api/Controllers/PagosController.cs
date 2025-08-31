@@ -1,23 +1,38 @@
-﻿using Megatlon.Payments.Application.Contracts.Requests;
+﻿using FluentValidation;
+using Megatlon.Payments.Application.Contracts.Requests;
 using Megatlon.Payments.Application.Contracts.Responses;
 using Megatlon.Payments.Domain.Entities;
 using Megatlon.Payments.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using FluentValidation.Results;
 
 namespace Megatlon.Payments.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class PagosController : ControllerBase
     {
         private readonly PaymentsDbContext _db;
-        public PagosController(PaymentsDbContext db) => _db = db;
+        private readonly IValidator<RegistrarPagoRequest> _validator;
+
+        public PagosController(PaymentsDbContext db, IValidator<RegistrarPagoRequest> validator)
+        {
+            _db = db;
+            _validator = validator;
+        }
 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] RegistrarPagoRequest request, CancellationToken ct)
         {
+            ValidationResult vr = await _validator.ValidateAsync(request, ct);
+            if (!vr.IsValid)
+            {
+                var errs = vr.Errors.Select(e => e.ErrorMessage).ToList();
+                return BadRequest(new ApiResponse(false, "Datos inválidos", null, errs));
+            }
+
             // Idempotencia: si ya existe un pago con Source + ExternalReference, no crear otro
             var existing = await _db.Pagos
                 .AsNoTracking()
