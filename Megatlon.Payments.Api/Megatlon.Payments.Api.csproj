@@ -20,4 +20,10 @@
     <ProjectReference Include="..\Megatlon.Payments.Infrastructure\Megatlon.Payments.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="app.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
